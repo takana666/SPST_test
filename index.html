@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DBMS_Speed & Stamina checker（テスト中）</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    .row { display: flex; gap: 10px; margin-top: 10px; }
+    select { flex: 1; margin-top: 5px; }
+    .result, .result-abmid { padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-top: 15px; max-width: 600px; }
+    .range { margin-bottom: 12px; }
+    .section-title { font-weight: bold; margin-top: 12px; }
+    .divider {
+      max-width: 620px;
+      margin: 20px 0;
+      border: none;
+      border-top: 2px solid #88a;    /* 太さ2px、色#88aで外枠と統一 */
+      border-radius: 8px;
+    }
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .tab-button {
+      padding: 8px 24px; background: #f3f3f3; border: 1px solid #bbb; border-radius: 10px 10px 0 0;
+      cursor: pointer; font-weight: bold; outline: none; min-width: 120px;
+    }
+    .tab-button.active { background: #fff; border-bottom: 1px solid #fff; }
+    .tab-content {
+        display: none;
+        margin-top: 10px;
+        padding: 18px 24px;
+        background: #f9f9f9;
+        max-width: 600px;
+    }
+
+    .tab-content.active {
+        display: block;
+        border: 2px solid #88a;
+        border-radius: 14px;
+        box-shadow: 0 2px 8px #8882;
+        max-width: 600px;
+    }
+    .sp-table-scroll { max-width: 610px; overflow-x: auto; }
+    table { border-collapse: collapse; min-width: 540px; }
+    th, td { border: 1px solid #aaa; padding: 5px 8px; text-align: right; font-size: 14px; }
+    th { background: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>DBMS_Speed & Stamina checker（テスト中）</h1>
+  <h5>リリース日：2025/05/12<br>
+    計算の都合上、一部の値の上限を200or199に制限しています<br>
+    バグ確認中のため、不具合見つけたら連絡ください
+  </h5>
+
+  <div class="tabs">
+    <button class="tab-button active" data-tab="tab判定">SPST判定</button>
+    <button class="tab-button" data-tab="tab測定">SPST測定</button>
+    <button class="tab-button" data-tab="tab表">SP表</button>
+  </div>
+
+  <!-- SPST判定 タブ -->
+  <div id="tab判定" class="tab-content active">
+    <label for="commentA">上段コメA:</label>
+    <select id="commentA">
+      <option value="">--選択してください--</option>
+      <option value="A1">計り知れない素質を感じます</option>
+      <option value="A2">スピードタイプの素晴らしい馬ですね</option>
+      <option value="A3">スタミナタイプの素晴らしい馬ですね</option>
+      <option value="A4">これは凄い素質の馬ですね</option>
+    </select>
+    <label for="commentB">上段コメB:</label>
+    <select id="commentB">
+      <option value="">--選択してください--</option>
+      <option value="B1">常識では測れないような馬ですね…一瞬後光が射したような…</option>
+      <option value="B2">数多くの馬をみてきましたが時代を築くこと間違いないです</option>
+      <option value="B3">海外でも活躍して時代を代表する馬になるかもしれません</option>
+      <option value="B4">将来は海外も視野に入れたほうが良いでしょう</option>
+    </select>
+    <label for="commentMid">中段コメタイプ:</label>
+    <select id="commentMid">
+      <option value="">--選択してください--</option>
+      <option value="speedType">スピードタイプ (Speed > Stamina)</option>
+      <option value="staminaType">スタミナタイプ (Speed < Stamina)</option>
+      <option value="balanceType">バランスタイプ (Speed = Stamina)</option>
+    </select>
+    <div class="row">
+      <div>
+        <label for="speedVal">スピード値 (A–E):</label>
+        <select id="speedVal">
+          <option value="">--選択してください--</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+      <div>
+        <label for="staminaVal">スタミナ値 (A–E):</label>
+        <select id="staminaVal">
+          <option value="">--選択してください--</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+    </div>
+    <h4>上段コメと中段コメから推定されるスピスタ範囲</h4>
+    <div class="result-abmid" id="outputABMid">上段・中段コメント条件の共通範囲がここに表示されます。</div>
+    <hr class="divider">
+    <label for="memory">メモリ:</label>
+    <select id="memory">
+      <option value="">--選択してください--</option>
+      <option value="M1a">1 一息（75-79%）</option>
+      <option value="M1b">1 まだ先（70-74%）</option>
+      <option value="M2">2（60-69%）</option>
+      <option value="M3">3（50-59%）</option>
+      <option value="M4">4（40-49%）</option>
+      <option value="M5">5（30-39%）</option>
+      <option value="M6">6（20-29%）</option>
+    </select>
+    <label for="category">下段コメント:</label>
+    <select id="category">
+      <option value="">--選択してください--</option>
+      <option>スピードでこの馬が</option>
+      <option>既にG1で勝ち負け</option>
+      <option>G1現実的</option>
+      <option>G1にも手が届く</option>
+      <option>G1相手次第</option>
+      <option>距離次第</option>
+      <option>スタミナいまひとつ</option>
+      <option>スピードスタミナいまひとつ</option>
+      <option>スピードいまひとつ</option>
+      <option>今の馬のスピード</option>
+      <option>まあG1</option>
+      <option>スタ要求</option>
+      <option>スピ欠け</option>
+    </select>
+    <div class="row">
+      <div>
+        <label for="speedInit">スピード初期値 (A–E):</label>
+        <select id="speedInit">
+          <option value="">--選択してください--</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+      <div>
+        <label for="staminaInit">スタミナ初期値 (A–E):</label>
+        <select id="staminaInit">
+          <option value="">--選択してください--</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+    </div>
+    <h4>メモリ・下段コメント・スピスタ初期値における現状値と推定されるスピスタ範囲</h4>
+    <div class="result" id="output">メモリ・下段コメント・初期値条件による現在値と推定値がここに表示されます</div>
+    <hr class="divider">
+    <h4>全コメントから推定されるスピスタ範囲</h4>
+    <div class="result" id="outputAllComments">全ての条件結果がここに表示</div>
+   </div>
+
+    <!-- SPST測定タブ -->
+    <div id="tab測定" class="tab-content">
+        <div class="result" style="margin-bottom:16px;">
+            <h4>全コメントから推定されるスピスタ範囲:</h4>
+            <span id="measure_sp">推定スピ:-- ～ --</span><br>
+            <span id="measure_st">推定スタ:-- ～ --</span>
+        </div>
+        <hr class="divider">
+        <h4>スピスタ確定値（未実装）：</h4>
+        <div class="row">
+            <div>
+                <label>スピード初期値（実測）:</label>
+                <select id="measure_sp_init"></select>
+            </div>
+            <div>
+                <label>スタミナ初期値（実測）:</label>
+                <select id="measure_st_init"></select>
+            </div>
+        </div>
+        <div style="margin-top:20px;">
+            <span>スピ: <span id="measure_sp_val">--</span></span>
+            <span style="margin-left:32px;">スタ: <span id="measure_st_val">--</span></span>
+        </div>
+        <hr class="divider">
+        <div style="margin-top:16px;">
+            <h4>各スピ条件に到達するまでのスピード最低本数：</h4>
+            現スピ：<span id="curSpMin_val">--</span>　最小スピ時の現スピ：<span id="spTableMinVmax_val">--</span>
+        </div>
+
+        <br>
+
+        <div>
+            <div>蓋まで：<span id="cap_val">--</span></div>
+            <div>75%：<span id="sp75_val">--</span></div>
+            <div>85%：<span id="sp85_val">--</span></div>
+            <div>スピ120：<span id="sp120_val">--</span></div>
+            <div>スピ150：<span id="sp150_val">--</span></div>
+            <div>スピA（100）：<span id="spA_val">--</span></div>
+            <div>スピB（85）：<span id="spB_val">--</span></div>
+            <div>スピC（70）：<span id="spC_val">--</span></div>
+        </div>
+        <h5>75%、85%までの最小本数は計算基準値からズレる場合があるため<br>
+            -1~-2を見込んで使ってください<br>
+            「現スピ＜最小スピ時の現スピ」の場合、最小本数の乖離が大きいです<br>
+            マイナスとなる値は既にその条件値を越えていると読み替えてください<br>
+            完全対応ロジックは未完成のため、当該条件までの参考本数としてください
+        </h5>
+    </div>
+
+  <!-- SP表タブ -->
+  <div id="tab表" class="tab-content">
+    <div class="result" style="margin-bottom:16px;">
+      <h4>全コメントから推定されるスピスタ範囲:</h4>
+      <span id="table_sp">推定スピ:-- ～ --</span><br>
+      <span id="table_st">推定スタ:-- ～ --</span>
+    </div>
+    <div class="sp-table-scroll" id="spTableContainer"></div>
+  </div>
+
+  <script>
+    // ↓↓↓↓↓↓↓↓↓↓↓ SPST判定ロジック（添付ファイル内容と一切変更なし）↓↓↓↓↓↓↓↓↓↓↓
+    const mapA = {
+      A1: { speed:[120,Infinity], stamina:[120,Infinity] },
+      A2: { speed:[120,Infinity], stamina:[110,119] },
+      A3: { speed:[110,119], stamina:[120,Infinity] },
+      A4: [
+        { speed:[81,Infinity], stamina:[81,109] },
+        { speed:[81,109], stamina:[81,Infinity] },
+        { speed:[110,119], stamina:[110,119] }
+      ]
+    };
+    const mapB = {
+      B1: { sum:[275,Infinity] },
+      B2: { sum:[250,274] },
+      B3: { sum:[230,249] },
+      B4: { sum:[180,229] }
+    };
+    const compareMid = {
+      speedType: (s,st) => s > st,
+      staminaType: (s,st) => s < st,
+      balanceType: (s,st) => s === st
+    };
+    const categoryMap = {
+      "スピードでこの馬が": [{speed:[150,200],stamina:[0,200]}],
+      "既にG1で勝ち負け": [{speed:[120,149],stamina:[0,200]}],
+      "G1現実的": [{speed:[70,99],stamina:[90,200]},{speed:[90,119],stamina:[70,89]}],
+      "G1にも手が届く": [{speed:[0,69],stamina:[90,200]},{speed:[90,119],stamina:[0,69]}],
+      "G1相手次第": [{speed:[70,79],stamina:[80,89]},{speed:[80,90],stamina:[70,89]}],
+      "距離次第": [{speed:[80,89],stamina:[0,69]},{speed:[0,79],stamina:[80,89]}],
+      "スタミナいまひとつ": [{speed:[70,79],stamina:[60,79]}],
+      "スピードスタミナいまひとつ": [{speed:[70,79],stamina:[0,59]}],
+      "スピードいまひとつ": [{speed:[60,69],stamina:[70,79]}],
+      "今の馬のスピード": [{speed:[0,54],stamina:[70,79]}],
+      "まあG1": [{speed:[60,69],stamina:[60,69]}],
+      "スタ要求": [{speed:[60,69],stamina:[0,59]}],
+      "スピ欠け": [{speed:[0,59],stamina:[0,69]}]
+    };
+    const gradeMap = { A:[100,Infinity], B:[85,99], C:[70,84], D:[55,69], E:[0,54] };
+    const memoryMap = { M1a:[75,79], M1b:[70,74], M2:[60,69], M3:[50,59], M4:[40,49], M5:[30,39], M6:[20,29] };
+    const memoryCap = { M1a:100, M1b:100, M2:90, M3:80, M4:70, M5:50, M6:50 };
+
+    function intersect(a,b){const lo=Math.max(a[0],b[0]),hi=Math.min(a[1],b[1]);return lo<=hi?[lo,hi]:null;}
+    let dispSpMin=0, dispSpMax=0, tMinAll=0, tMaxAll=0, allCommentsSp=[0,0], allCommentsSt=[0,0];
+    let currentRanges = []; // ← SPST測定・SP表用
+    let spTableData = [];   // ← SP表用
+
+    function updateABMid(){
+      const a=document.getElementById('commentA').value;
+      const b=document.getElementById('commentB').value;
+      const m=document.getElementById('commentMid').value;
+      const spVal=document.getElementById('speedVal').value;
+      const stVal=document.getElementById('staminaVal').value;
+      const condA=mapA[a],condB=mapB[b],comp=compareMid[m];
+      const gS=spVal?gradeMap[spVal]:[0,200],gT=stVal?gradeMap[stVal]:[0,200];
+      const outDiv=document.getElementById('outputABMid');
+      if(!condA){outDiv.innerHTML='<p>A が未選択です。</p>';return;}
+      let valid=[];const rangesA=Array.isArray(condA)?condA:[condA];
+      rangesA.forEach(rA=>{
+        const sMinA=rA.speed[0],sMaxA=Math.min(rA.speed[1],200);
+        const tMinA=rA.stamina[0],tMaxA=Math.min(rA.stamina[1],200);
+        for(let s=sMinA;s<=sMaxA;s++){
+          if(s<gS[0]||s>gS[1])continue;
+          for(let st=tMinA;st<=tMaxA;st++){
+            if(st<gT[0]||st>gT[1])continue;
+            let ok=true;
+            if(condB){const sum=s+st;if(sum<condB.sum[0]||sum>condB.sum[1])ok=false;}
+            if(ok&&comp&&!comp(s,st))ok=false;
+            if(ok)valid.push({s,st});
+          }
+        }
+      });
+      if(valid.length===0){outDiv.innerHTML='<p>該当する範囲がありません。</p>';return;}
+      const sVals=valid.map(v=>v.s),tVals=valid.map(v=>v.st);
+      dispSpMin=Math.min(...sVals);dispSpMax=Math.max(...sVals);
+      tMinAll=Math.min(...tVals);tMaxAll=Math.max(...tVals);
+      outDiv.innerHTML=
+        `<div class="section-title">取り得るスピスタ範囲</div>`+
+        `<div class="range"><strong>スピード:</strong> ${dispSpMin} ～ ${dispSpMax}</div>`+
+        `<div class="range"><strong>スタミナ:</strong> ${tMinAll} ～ ${tMaxAll}</div>`;
+    }
+
+    function computeRanges(){
+      const cat=document.getElementById('category').value;
+      const spG=document.getElementById('speedInit').value;
+      const stG=document.getElementById('staminaInit').value;
+      if(!cat||!spG||!stG)return[];
+      const cr=categoryMap[cat]||[];const spI=gradeMap[spG],stI=gradeMap[stG];
+      let out=[];cr.forEach(({speed:spC,stamina:stC})=>{
+        const spR=intersect(spC,spI),stR=intersect(stC,stI);
+        if(spR&&stR)out.push({curSpeed:spR,curStamina:stR});
+      });return out;
+    }
+
+    function updateOutput(){
+      updateABMid();
+      const ranges=computeRanges();
+      currentRanges = ranges;
+      const mem=memoryMap[document.getElementById('memory').value];
+      const outDiv=document.getElementById('output');
+      if(ranges.length===0){outDiv.innerHTML='<p>下段条件に該当なし。</p>';return;}
+      let html='<div class="section-title">現状のスピード・スタミナ値</div>';
+      ranges.forEach(r=>{
+        html+=`<div class="range"><strong>現スピ:</strong> ${r.curSpeed[0]} ～ ${r.curSpeed[1]}<br/>`+
+              `<strong>現スタ:</strong> ${r.curStamina[0]} ～ ${r.curStamina[1]}</div>`;
+      });
+      html+='<div class="section-title">推定スピード・スタミナ値</div>';
+      let tempD=[];
+      if(mem){
+        const[pMin,pMax]=mem;let tableMax={},tableMin={};
+        for(let s=0;s<=500;s++){
+          let vMax=Math.floor(s*pMax/100),vMin=Math.floor(s*pMin/100);
+          (tableMax[vMax]=tableMax[vMax]||[]).push(s);
+          (tableMin[vMin]=tableMin[vMin]||[]).push(s);
+        }
+        ranges.forEach(r=>{
+          const maxCur=r.curSpeed[1],minCur=r.curSpeed[0];
+          const candMax = tableMax[minCur] || [];
+          const candMin = tableMin[maxCur] || [];
+          const dMin = candMax.length > 0 ? Math.min(...candMax) : null;
+          const dMax = candMin.length > 0 ? Math.max(...candMin) : null;
+          tempD.push({dMin,dMax});
+          html+=`<div class="range"><strong>推定スピ:</strong> ${dMin} ～ ${dMax}</div>`;
+        });
+      }
+      ranges.forEach(r=>{
+        const estStMin=r.curStamina[0]*2,estStMax=r.curStamina[1]*2+1;
+        html+=`<div class="range"><strong>推定スタ:</strong> ${estStMin} ～ ${estStMax}</div>`;
+      });
+      outDiv.innerHTML=html;
+
+      // 全コメント推定値
+      const allDiv=document.getElementById('outputAllComments');
+      const a=document.getElementById('commentA').value;
+      const b=document.getElementById('commentB').value;
+      const m=document.getElementById('commentMid').value;
+      const spV=document.getElementById('speedVal').value;
+      const stV=document.getElementById('staminaVal').value;
+      const condA=mapA[a],condB=mapB[b],comp=compareMid[m];
+      const gS=spV?gradeMap[spV]:[0,200],gT=stV?gradeMap[stV]:[0,200];
+
+      let validAll=[];
+      if(tempD.length>0){
+        for(let s=tempD[0].dMin;s<=tempD[0].dMax;s++){
+          if(s<gS[0]||s>gS[1])continue;
+          for(let st=ranges[0].curStamina[0]*2;st<=ranges[0].curStamina[1]*2+1;st++){
+            if(st<gT[0]||st>gT[1])continue;
+            const rangesA=Array.isArray(condA)?condA:[condA];
+            if(!rangesA.some(rA=>s>=rA.speed[0]&&s<=rA.speed[1]&&st>=rA.stamina[0]&&st<=rA.stamina[1]))continue;
+            if(condB){const sum=s+st; if(sum<condB.sum[0]||sum>condB.sum[1])continue;}
+            if(comp&&!comp(s,st))continue;
+            validAll.push({s,st});
+          }
+        }
+      }
+      if(validAll.length===0){
+        allDiv.innerHTML='<p>全コメント条件に該当する範囲がありません。</p>';
+        allCommentsSp = [null, null];
+        allCommentsSt = [null, null];
+      } else {
+        const sVals=validAll.map(v=>v.s),tVals=validAll.map(v=>v.st);
+        allCommentsSp=[Math.min(...sVals),Math.max(...sVals)];
+        allCommentsSt=[Math.min(...tVals),Math.max(...tVals)];
+        allDiv.innerHTML=
+          `<div class="section-title"></div>`+
+          `<div class="range"><strong>推定スピ:</strong>${allCommentsSp[0]} ～ ${allCommentsSp[1]}</div>`+
+          `<div class="range"><strong>推定スタ:</strong>${allCommentsSt[0]} ～ ${allCommentsSt[1]}</div>`;
+      }
+
+      // 測定/表タブへ値反映
+      updateMeasureTab();
+      updateTableTab();
+    }
+
+    // ----- タブ処理 -----
+    document.querySelectorAll('.tab-button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById(this.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ----- SPST測定 タブの内容 -----
+    function updateMeasureTab() {
+        // 推定値表示
+        document.getElementById('measure_sp').textContent = `推定スピ:${allCommentsSp[0]||"--"} ～ ${allCommentsSp[1]||"--"}`;
+        document.getElementById('measure_st').textContent = `推定スタ:${allCommentsSt[0]||"--"} ～ ${allCommentsSt[1]||"--"}`;
+
+        // プルダウン生成
+        let spSel = document.getElementById('measure_sp_init');
+        let stSel = document.getElementById('measure_st_init');
+        let spMin = allCommentsSp[0]||0, spMax = allCommentsSp[1]||0, stMin = allCommentsSt[0]||0, stMax = allCommentsSt[1]||0;
+        spSel.innerHTML = `<option value="">--選択してください--</option>`;
+        stSel.innerHTML = `<option value="">--選択してください--</option>`;
+        for(let v=spMin; v<=spMax; v++) spSel.innerHTML += `<option value="${v}">${v}</option>`;
+        for(let v=stMin; v<=stMax; v++) stSel.innerHTML += `<option value="${v}">${v}</option>`;
+
+        // 値表示ロジック
+        function displayValues() {
+            const spVal = spSel.value, stVal = stSel.value;
+            let spShow="--", stShow="--";
+            if(spVal && !stVal) spShow = spVal;
+            if(!spVal && stVal) stShow = stVal;
+            if(spVal && stVal) { spShow = spVal; stShow = stVal; }
+            document.getElementById('measure_sp_val').textContent = spShow;
+            document.getElementById('measure_st_val').textContent = stShow;
+        }
+        spSel.onchange = displayValues;
+        stSel.onchange = displayValues;
+        spSel.selectedIndex = 0; stSel.selectedIndex = 0;
+        displayValues();
+
+        // --- ここから 75%/85%計算修正 ---
+        let sp75 = "--", sp85 = "--";
+        let curSpMin = (currentRanges.length > 0) ? currentRanges[0].curSpeed[0] : undefined;
+        let curSpMax = (currentRanges.length > 0) ? currentRanges[0].curSpeed[1] : undefined;
+        let spTableMinVmax = (spTableData.length > 0) ? spTableData[0].vmax : undefined;
+
+        // baseSpMinとして大きい方を選択
+        let baseSpMin = (typeof curSpMin !== "undefined" && typeof spTableMinVmax !== "undefined")
+            ? Math.max(curSpMin, spTableMinVmax)
+            : undefined;
+
+        // 「現スピ」「最小スピ時の現スピ」表示
+        document.getElementById('curSpMin_val').textContent = (typeof curSpMin !== "undefined" ? curSpMin : "--");
+        document.getElementById('spTableMinVmax_val').textContent = (typeof spTableMinVmax !== "undefined" ? spTableMinVmax : "--");
+
+        // 75%, 85%の計算
+        if (typeof baseSpMin !== "undefined" && spTableData.length > 0) {
+            // baseSpMinと等しい vmax の行（speed小さい方優先）
+            let candidates = spTableData.filter(row => row.vmax === baseSpMin);
+            if (candidates.length > 0) {
+                candidates.sort((a, b) => a.speed - b.speed);
+                let row = candidates[0];
+                sp75 = row.v75 - baseSpMin;
+                sp85 = row.v85 - baseSpMin;
+            }
+        }
+
+        //蓋までの計算
+        let capVal = "--";
+        if (typeof baseSpMin !== "undefined" && spTableData.length > 0) {
+            // 「初期値max」列（vmax）が baseSpMin と一致する行を全て取得
+            let candidates = spTableData.filter(row => row.vmax === baseSpMin);
+            if (candidates.length > 0) {
+                // スピード値が小さい順にソートし、一番小さい行を採用
+                candidates.sort((a, b) => a.speed - b.speed);
+                let row = candidates[0];
+                capVal = row.vcap - baseSpMin;
+            }
+        }
+
+        document.getElementById('cap_val').textContent = capVal;
+        document.getElementById('sp75_val').textContent = sp75;
+        document.getElementById('sp85_val').textContent = sp85;
+        document.getElementById('sp120_val').textContent = (typeof curSpMax !== "undefined") ? (120 - curSpMax) : "--";
+        document.getElementById('sp150_val').textContent = (typeof curSpMax !== "undefined") ? (150 - curSpMax) : "--";
+        document.getElementById('spA_val').textContent = (typeof curSpMax !== "undefined") ? (100 - curSpMax) : "--";
+        document.getElementById('spB_val').textContent = (typeof curSpMax !== "undefined") ? (85 - curSpMax) : "--";
+        document.getElementById('spC_val').textContent = (typeof curSpMax !== "undefined") ? (70 - curSpMax) : "--";
+    }
+
+    // --- SP表データ作成
+    function makeSPTable() {
+    const memoryKey = document.getElementById('memory').value;
+    let spMin = allCommentsSp[0] || 0, spMax = allCommentsSp[1] || 0;
+    let cap = memoryCap[memoryKey] || 100;
+    let mem = memoryMap[memoryKey] || [75,79];
+    spTableData = [];
+    for (let s = spMin; s <= spMax; s++) {
+      let v85 = Math.ceil(s * 85 / 100),
+          v75 = Math.ceil(s * 75 / 100),
+          vmax = Math.floor(s * mem[1] / 100),
+          vmin = Math.floor(s * mem[0] / 100),
+          vcap = Math.round(s * cap / 100);
+      spTableData.push({speed: s, v85, v75, vmax, vmin, vcap});
+    }
+  }
+
+
+
+    // ----- SP表 タブの内容 -----
+    function updateTableTab() {
+    document.getElementById('table_sp').textContent = `推定スピ:${allCommentsSp[0]||"--"} ～ ${allCommentsSp[1]||"--"}`;
+    document.getElementById('table_st').textContent = `推定スタ:${allCommentsSt[0]||"--"} ～ ${allCommentsSt[1]||"--"}`;
+    makeSPTable(); // ←ここでspTableDataを生成
+    let th = `<tr><th>スピード</th><th>85%</th><th>75%</th><th>初期値max</th><th>初期値min</th><th>蓋</th></tr>`;
+    let rows = "";
+    spTableData.forEach(row => {
+        rows += `<tr><td>${row.speed}</td><td>${row.v85}</td><td>${row.v75}</td><td>${row.vmax}</td><td>${row.vmin}</td><td>${row.vcap}</td></tr>`;
+    });
+    document.getElementById('spTableContainer').innerHTML = `<table>${th}${rows}</table>`;
+    }
+
+    // ----- イベントリスナ -----
+    ['commentA','commentB','commentMid','speedVal','staminaVal',
+     'memory','category','speedInit','staminaInit'
+    ].forEach(id => document.getElementById(id).addEventListener('change', function() {
+     updateOutput();
+     makeSPTable();
+     updateTableTab();
+     updateMeasureTab();
+    }));
+  </script>
+</body>
+</html>
