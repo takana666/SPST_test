@@ -44,6 +44,17 @@
     table { border-collapse: collapse; min-width: 540px; }
     th, td { border: 1px solid #aaa; padding: 5px 8px; text-align: right; font-size: 14px; }
     th { background: #f4f4f4; }
+
+    /* 測定中スピのボタン用（最低限） */
+    .mini-btn {
+      padding: 2px 10px;
+      border: 1px solid #999;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 0 6px;
+    }
   </style>
 </head>
 <body>
@@ -114,19 +125,21 @@
     <label for="memory">メモリ:</label>
     <select id="memory">
       <option value="">--選択してください--</option>
-      <option value="M1a">1 一息（75-79%）</option>
-      <option value="M1b">1 まだ先（70-74%）</option>
-      <option value="M2">2（60-69%）</option>
-      <option value="M3">3（50-59%）</option>
-      <option value="M4">4（40-49%）</option>
-      <option value="M5">5（30-39%）</option>
-      <option value="M6">6（20-29%）</option>
+      <option value="M1a">1 一息（75-79.9%）</option>
+      <option value="M1b">1 まだ先（70-74.9%）</option>
+      <option value="M2">2（60-69.9%）</option>
+      <option value="M3">3（50-59.9%）</option>
+      <option value="M4">4（40-49.9%）</option>
+      <option value="M5">5（30-39.9%）</option>
+      <option value="M6">6（20-29.9%）</option>
     </select>
     <label for="category">下段コメント:</label>
     <select id="category">
       <option value="">--選択してください--</option>
       <option>スピードでこの馬が</option>
       <option>既にG1で勝ち負け</option>
+      <option>勝ち負け</option>
+      <option>瞬発力が不安</option>
       <option>G1現実的</option>
       <option>G1にも手が届く</option>
       <option>G1相手次第</option>
@@ -178,7 +191,7 @@
             <span id="measure_st">推定スタ:-- ～ --</span>
         </div>
         <hr class="divider">
-        <h4>スピスタ確定値（未実装）：</h4>
+        <h4>スピスタ確定値：</h4>
         <div class="row">
             <div>
                 <label>スピード初期値（実測）:</label>
@@ -193,27 +206,93 @@
             <span>スピ: <span id="measure_sp_val">--</span></span>
             <span style="margin-left:32px;">スタ: <span id="measure_st_val">--</span></span>
         </div>
+
+        <!-- 確定値（範囲/成立判定）表示 -->
+        <div style="margin-top:12px;">
+            <div>（スピ指定時）取り得るスタ：<span id="measure_st_range">--</span></div>
+            <div>（スタ指定時）取り得るスピ：<span id="measure_sp_range">--</span></div>
+            <div>（両方指定時）判定：<span id="measure_pair_judge">--</span></div>
+        </div>
+
         <hr class="divider">
+
         <div style="margin-top:16px;">
             <h4>各スピ条件に到達するまでのスピード最低本数：</h4>
-            現スピ：<span id="curSpMin_val">--</span>　最小スピ時の現スピ：<span id="spTableMinVmax_val">--</span>
+            <div>
+              取り得るスピ：
+              <select id="baseSp_select"></select>
+            </div>
+            <div>入厩時最大スピ：<span id="nyukyuSpMax_val">--</span></div>
+            <div style="margin-top:8px;">
+                測定中スピ：
+                <button class="mini-btn" id="measSp_dec">-</button>
+                <span id="measuringSp_val">--</span>
+                <button class="mini-btn" id="measSp_inc">+</button>
+            </div>
         </div>
 
         <br>
 
-        <div>
-            <div>蓋まで：<span id="cap_val">--</span></div>
-            <div>75%：<span id="sp75_val">--</span></div>
-            <div>85%：<span id="sp85_val">--</span></div>
-            <div>スピ120：<span id="sp120_val">--</span></div>
-            <div>スピ150：<span id="sp150_val">--</span></div>
-            <div>スピA（100）：<span id="spA_val">--</span></div>
-            <div>スピB（85）：<span id="spB_val">--</span></div>
-            <div>スピC（70）：<span id="spC_val">--</span></div>
-        </div>
-        <h5>75%、85%までの最小本数は計算基準値からズレる場合があるため<br>
+        <!-- 指定仕様：4列の表 -->
+        <table style="min-width: 520px;">
+            <tr>
+                <th style="text-align:left;">項目</th>
+                <th>スピ値</th>
+                <th>必要本数</th>
+                <th>現状値からの必要本数</th>
+            </tr>
+            <tr>
+                <td style="text-align:left;">蓋まで</td>
+                <td><span id="tbl_sp_cap">--</span></td>
+                <td><span id="tbl_need_cap_nyukyu">--</span></td>
+                <td><span id="tbl_need_cap_now">--</span></td>
+            </tr>
+            <tr>
+                <td style="text-align:left;">75%</td>
+                <td><span id="tbl_sp_75">--</span></td>
+                <td><span id="tbl_need_75_nyukyu">--</span></td>
+                <td><span id="tbl_need_75_now">--</span></td>
+            </tr>
+            <tr>
+                <td style="text-align:left;">85%</td>
+                <td><span id="tbl_sp_85">--</span></td>
+                <td><span id="tbl_need_85_nyukyu">--</span></td>
+                <td><span id="tbl_need_85_now">--</span></td>
+            </tr>
+            <tr>
+                <td style="text-align:left;">スピ120</td>
+                <td><span id="tbl_sp_120">120</span></td>
+                <td><span id="tbl_need_120_nyukyu">--</span></td>
+                <td><span id="tbl_need_120_now">--</span></td>
+            </tr>
+            <tr>
+                <td style="text-align:left;">スピ150</td>
+                <td><span id="tbl_sp_150">150</span></td>
+                <td><span id="tbl_need_150_nyukyu">--</span></td>
+                <td><span id="tbl_need_150_now">--</span></td>
+            </tr>
+            <tr>
+                <td style="text-align:left;">スピA</td>
+                <td><span id="tbl_sp_A">100</span></td>
+                <td><span id="tbl_need_A_nyukyu">--</span></td>
+                <td><span id="tbl_need_A_now">--</span></td>
+            </tr>
+            <tr>
+                <td style="text-align:left;">スピB</td>
+                <td><span id="tbl_sp_B">85</span></td>
+                <td><span id="tbl_need_B_nyukyu">--</span></td>
+                <td><span id="tbl_need_B_now">--</span></td>
+            </tr>
+            <tr>
+                <td style="text-align:left;">スピC</td>
+                <td><span id="tbl_sp_C">70</span></td>
+                <td><span id="tbl_need_C_nyukyu">--</span></td>
+                <td><span id="tbl_need_C_now">--</span></td>
+            </tr>
+        </table>
+
+        <h5 style="margin-top:12px;">75%、85%までの最小本数は計算基準値からズレる場合があるため<br>
             -1~-2を見込んで使ってください<br>
-            「現スピ＜最小スピ時の現スピ」の場合、最小本数の乖離が大きいです<br>
             マイナスとなる値は既にその条件値を越えていると読み替えてください<br>
             完全対応ロジックは未完成のため、当該条件までの参考本数としてください
         </h5>
@@ -255,26 +334,48 @@
     const categoryMap = {
       "スピードでこの馬が": [{speed:[150,200],stamina:[0,200]}],
       "既にG1で勝ち負け": [{speed:[120,149],stamina:[0,200]}],
-      "G1現実的": [{speed:[70,99],stamina:[90,200]},{speed:[90,119],stamina:[70,89]}],
-      "G1にも手が届く": [{speed:[0,69],stamina:[90,200]},{speed:[90,119],stamina:[0,69]}],
-      "G1相手次第": [{speed:[70,79],stamina:[80,89]},{speed:[80,90],stamina:[70,89]}],
-      "距離次第": [{speed:[80,89],stamina:[0,69]},{speed:[0,79],stamina:[80,89]}],
+
+      "勝ち負け": [{speed:[100,119],stamina:[0,89]}],
+      "瞬発力が不安": [{speed:[100,119],stamina:[90,200]}],
+
+      "G1現実的": [{speed:[70,99],stamina:[90,200]},{speed:[90,99],stamina:[70,89]}],
+      "G1にも手が届く": [{speed:[0,69],stamina:[90,200]},{speed:[90,99],stamina:[0,69]}],
+
+      "G1相手次第": [{speed:[70,79],stamina:[80,89]},{speed:[80,89],stamina:[70,89]}],
+      "距離次第": [{speed:[80,89],stamina:[0,69]},{speed:[0,69],stamina:[80,89]}],
+
       "スタミナいまひとつ": [{speed:[70,79],stamina:[60,79]}],
       "スピードスタミナいまひとつ": [{speed:[70,79],stamina:[0,59]}],
       "スピードいまひとつ": [{speed:[60,69],stamina:[70,79]}],
-      "今の馬のスピード": [{speed:[0,54],stamina:[70,79]}],
+      "今の馬のスピード": [{speed:[0,59],stamina:[70,79]}],
       "まあG1": [{speed:[60,69],stamina:[60,69]}],
       "スタ要求": [{speed:[60,69],stamina:[0,59]}],
       "スピ欠け": [{speed:[0,59],stamina:[0,69]}]
     };
     const gradeMap = { A:[100,Infinity], B:[85,99], C:[70,84], D:[55,69], E:[0,54] };
-    const memoryMap = { M1a:[75,79], M1b:[70,74], M2:[60,69], M3:[50,59], M4:[40,49], M5:[30,39], M6:[20,29] };
+
+    const memoryMap = { M1a:[75,79.9], M1b:[70,74.9], M2:[60,69.9], M3:[50,59.9], M4:[40,49.9], M5:[30,39.9], M6:[20,29.9] };
     const memoryCap = { M1a:100, M1b:100, M2:90, M3:80, M4:70, M5:50, M6:50 };
 
     function intersect(a,b){const lo=Math.max(a[0],b[0]),hi=Math.min(a[1],b[1]);return lo<=hi?[lo,hi]:null;}
     let dispSpMin=0, dispSpMax=0, tMinAll=0, tMaxAll=0, allCommentsSp=[0,0], allCommentsSt=[0,0];
     let currentRanges = []; // ← SPST測定・SP表用
     let spTableData = [];   // ← SP表用
+
+    // 全コメント条件で成立する (s,st) の組（重複なし）を保持
+    let validAllPairs = [];
+
+    // 測定タブ：スタ指定時の「取り得るスピ」最小値（存在すれば）
+    let measure_sp_range_min_value = null;
+
+    // 測定タブ：測定中スピ（ユーザー操作）
+    let measuringSp = null;
+
+    // 測定タブ：取り得るスピ（プルダウンで選んだ値）
+    let baseSpMinForCap75_85 = null;
+
+    // 測定タブ：入厩時最大スピ（SPST判定タブの現スピ最大）
+    let nyukyuSpMax = null;
 
     function updateABMid(){
       const a=document.getElementById('commentA').value;
@@ -348,14 +449,22 @@
           const maxCur=r.curSpeed[1],minCur=r.curSpeed[0];
           const candMax = tableMax[minCur] || [];
           const candMin = tableMin[maxCur] || [];
-          const dMin = candMax.length > 0 ? Math.min(...candMax) : null;
-          const dMax = candMin.length > 0 ? Math.max(...candMin) : null;
+          let dMin = candMax.length > 0 ? Math.min(...candMax) : null;
+          let dMax = candMin.length > 0 ? Math.max(...candMin) : null;
+
+          // 推定スピの上限は200
+          if(dMin !== null) dMin = Math.min(dMin, 200);
+          if(dMax !== null) dMax = Math.min(dMax, 200);
+          if(dMin !== null && dMax !== null && dMin > dMax){ dMin = null; dMax = null; }
+
           tempD.push({dMin,dMax});
           html+=`<div class="range"><strong>推定スピ:</strong> ${dMin} ～ ${dMax}</div>`;
         });
       }
       ranges.forEach(r=>{
-        const estStMin=r.curStamina[0]*2,estStMax=r.curStamina[1]*2+1;
+        // 推定スタの上限は200
+        const estStMin=Math.min(r.curStamina[0]*2, 200);
+        const estStMax=Math.min(r.curStamina[1]*2+1, 200);
         html+=`<div class="range"><strong>推定スタ:</strong> ${estStMin} ～ ${estStMax}</div>`;
       });
       outDiv.innerHTML=html;
@@ -370,26 +479,61 @@
       const condA=mapA[a],condB=mapB[b],comp=compareMid[m];
       const gS=spV?gradeMap[spV]:[0,200],gT=stV?gradeMap[stV]:[0,200];
 
-      let validAll=[];
-      if(tempD.length>0){
-        for(let s=tempD[0].dMin;s<=tempD[0].dMax;s++){
-          if(s<gS[0]||s>gS[1])continue;
-          for(let st=ranges[0].curStamina[0]*2;st<=ranges[0].curStamina[1]*2+1;st++){
-            if(st<gT[0]||st>gT[1])continue;
-            const rangesA=Array.isArray(condA)?condA:[condA];
-            if(!rangesA.some(rA=>s>=rA.speed[0]&&s<=rA.speed[1]&&st>=rA.stamina[0]&&st<=rA.stamina[1]))continue;
-            if(condB){const sum=s+st; if(sum<condB.sum[0]||sum>condB.sum[1])continue;}
-            if(comp&&!comp(s,st))continue;
-            validAll.push({s,st});
+      // 推定上限を200に固定（gradeMap側がInfinityでもここでは200まで）
+      const gSHi = Math.min(gS[1], 200);
+      const gTHi = Math.min(gT[1], 200);
+
+      // tempD全候補 × ranges全候補 を含めて validAllPairs を生成
+      validAllPairs = [];
+      const pairSet = new Set();
+
+      if(tempD.length>0 && ranges.length>0){
+        const rangesA=Array.isArray(condA)?condA:[condA];
+
+        tempD.forEach(td=>{
+          if(td.dMin === null || td.dMax === null) return;
+
+          // 推定スピ探索も200上限
+          const sStart = Math.max(td.dMin, 0);
+          const sEnd = Math.min(td.dMax, 200);
+
+          for(let s=sStart; s<=sEnd; s++){
+            if(s<gS[0]||s>gSHi)continue;
+
+            ranges.forEach(r=>{
+              // 推定スタ探索も200上限
+              const stMin = Math.max(r.curStamina[0]*2, 0);
+              const stMax = Math.min(r.curStamina[1]*2+1, 200);
+
+              for(let st=stMin; st<=stMax; st++){
+                if(st<gT[0]||st>gTHi)continue;
+
+                // 上段A条件
+                if(!rangesA.some(rA=>s>=rA.speed[0]&&s<=rA.speed[1]&&st>=rA.stamina[0]&&st<=rA.stamina[1]))continue;
+
+                // 上段B条件
+                if(condB){const sum=s+st; if(sum<condB.sum[0]||sum>condB.sum[1])continue;}
+
+                // 中段比較条件
+                if(comp && !comp(s,st))continue;
+
+                const key = s + "," + st;
+                if(!pairSet.has(key)){
+                  pairSet.add(key);
+                  validAllPairs.push({s,st});
+                }
+              }
+            });
           }
-        }
+        });
       }
-      if(validAll.length===0){
+
+      if(validAllPairs.length===0){
         allDiv.innerHTML='<p>全コメント条件に該当する範囲がありません。</p>';
         allCommentsSp = [null, null];
         allCommentsSt = [null, null];
       } else {
-        const sVals=validAll.map(v=>v.s),tVals=validAll.map(v=>v.st);
+        const sVals=validAllPairs.map(v=>v.s),tVals=validAllPairs.map(v=>v.st);
         allCommentsSp=[Math.min(...sVals),Math.max(...sVals)];
         allCommentsSt=[Math.min(...tVals),Math.max(...tVals)];
         allDiv.innerHTML=
@@ -412,6 +556,23 @@
         document.getElementById(this.dataset.tab).classList.add('active');
       });
     });
+
+    // --- SP表データ作成
+    function makeSPTable() {
+      const memoryKey = document.getElementById('memory').value;
+      let spMin = allCommentsSp[0] || 0, spMax = allCommentsSp[1] || 0;
+      let cap = memoryCap[memoryKey] || 100;
+      let mem = memoryMap[memoryKey] || [75,79.9];
+      spTableData = [];
+      for (let s = spMin; s <= spMax; s++) {
+        let v85 = Math.ceil(s * 85 / 100),
+            v75 = Math.ceil(s * 75 / 100),
+            vmax = Math.floor(s * mem[1] / 100),
+            vmin = Math.floor(s * mem[0] / 100),
+            vcap = Math.round(s * cap / 100);
+        spTableData.push({speed: s, v85, v75, vmax, vmin, vcap});
+      }
+    }
 
     // ----- SPST測定 タブの内容 -----
     function updateMeasureTab() {
@@ -438,101 +599,272 @@
             document.getElementById('measure_sp_val').textContent = spShow;
             document.getElementById('measure_st_val').textContent = stShow;
         }
-        spSel.onchange = displayValues;
-        stSel.onchange = displayValues;
+
+        // 1) 確定値（範囲/成立）表示
+        function displayFixedInfo() {
+            const spValStr = spSel.value;
+            const stValStr = stSel.value;
+            const spVal = spValStr !== "" ? Number(spValStr) : null;
+            const stVal = stValStr !== "" ? Number(stValStr) : null;
+
+            let stRangeText = "--";
+            let spRangeText = "--";
+            let judgeText = "--";
+
+            // スタ指定時の「取り得るスピ最小値」を保持（なければ null）
+            measure_sp_range_min_value = null;
+
+            if(validAllPairs.length === 0) {
+                document.getElementById('measure_st_range').textContent = "--";
+                document.getElementById('measure_sp_range').textContent = "--";
+                document.getElementById('measure_pair_judge').textContent = "--";
+                return;
+            }
+
+            // スピ指定時：取り得るスタ範囲
+            if(spVal !== null && stVal === null) {
+                const stCandidates = validAllPairs.filter(p => p.s === spVal).map(p => p.st);
+                if(stCandidates.length === 0) stRangeText = "該当なし";
+                else stRangeText = `${Math.min(...stCandidates)} ～ ${Math.max(...stCandidates)}`;
+            }
+
+            // スタ指定時：取り得るスピ範囲（ここで最小値を保持）
+            if(stVal !== null && spVal === null) {
+                const spCandidates = validAllPairs.filter(p => p.st === stVal).map(p => p.s);
+                if(spCandidates.length === 0) {
+                    spRangeText = "該当なし";
+                    measure_sp_range_min_value = null;
+                } else {
+                    const spMinCand = Math.min(...spCandidates);
+                    const spMaxCand = Math.max(...spCandidates);
+                    spRangeText = `${spMinCand} ～ ${spMaxCand}`;
+                    measure_sp_range_min_value = spMinCand;
+                }
+            }
+
+            // 両方指定時：成立/不成立
+            if(spVal !== null && stVal !== null) {
+                const ok = validAllPairs.some(p => (p.s === spVal && p.st === stVal));
+                judgeText = ok ? "成立" : "不成立";
+
+                // 両方指定時は仕様どおり範囲は出さない
+                stRangeText = "--";
+                spRangeText = "--";
+                measure_sp_range_min_value = null;
+            }
+
+            document.getElementById('measure_st_range').textContent = stRangeText;
+            document.getElementById('measure_sp_range').textContent = spRangeText;
+            document.getElementById('measure_pair_judge').textContent = judgeText;
+        }
+
+        // 2) 入厩時最大スピ と 測定中スピ初期化（baseSpMinForCap75_85 はプルダウンで決める）
+        function calcNyukyuAndMeasuring() {
+            // 入厩時最大スピ：SPST判定タブの「現スピ」最大（複数レンジなら最大値を採用）
+            if(currentRanges.length > 0) {
+                let maxList = currentRanges.map(r => r.curSpeed[1]);
+                nyukyuSpMax = Math.max(...maxList);
+            } else {
+                nyukyuSpMax = null;
+            }
+
+            document.getElementById('nyukyuSpMax_val').textContent = (nyukyuSpMax !== null ? nyukyuSpMax : "--");
+
+            // 測定中スピ：未設定なら入厩時最大スピで初期化。設定済ならクランプ。
+            if(measuringSp === null && nyukyuSpMax !== null) measuringSp = nyukyuSpMax;
+            if(measuringSp !== null) {
+                measuringSp = Math.max(0, Math.min(200, measuringSp));
+            }
+            document.getElementById('measuringSp_val').textContent = (measuringSp !== null ? measuringSp : "--");
+        }
+
+        // 3) 取り得るスピ（プルダウン）候補生成
+        //    - スタ指定あり：スタ指定時の取り得るスピ範囲
+        //    - スタ指定なし：全コメント推定スピ範囲（allCommentsSp）
+        function buildBaseSpSelect() {
+            const sel = document.getElementById('baseSp_select');
+
+            const stValStr = stSel.value;
+            const spValStr = spSel.value;
+            const stVal = stValStr !== "" ? Number(stValStr) : null;
+            const spVal = spValStr !== "" ? Number(spValStr) : null;
+
+            let candidates = [];
+
+            // スタ指定あり（スタのみ指定、スピ未指定）なら、そのスタにおける取り得るスピ範囲を採用
+            if (stVal !== null && spVal === null && validAllPairs.length > 0) {
+                const spList = validAllPairs.filter(p => p.st === stVal).map(p => p.s);
+                if (spList.length > 0) {
+                    const minS = Math.min(...spList);
+                    const maxS = Math.max(...spList);
+                    for (let v = minS; v <= maxS; v++) candidates.push(v);
+                }
+            }
+
+            // スタ指定がない場合は、全コメント推定スピ範囲を採用
+            if (candidates.length === 0) {
+                if (typeof allCommentsSp[0] === "number" && allCommentsSp[0] !== null &&
+                    typeof allCommentsSp[1] === "number" && allCommentsSp[1] !== null) {
+                    for (let v = allCommentsSp[0]; v <= allCommentsSp[1]; v++) candidates.push(v);
+                }
+            }
+
+            // プルダウン生成
+            sel.innerHTML = "";
+            if (candidates.length === 0) {
+                sel.innerHTML = `<option value="">--</option>`;
+                baseSpMinForCap75_85 = null;
+                return;
+            }
+
+            candidates.forEach(v => {
+                sel.innerHTML += `<option value="${v}">${v}</option>`;
+            });
+
+            // デフォルトは最小
+            sel.selectedIndex = 0;
+            baseSpMinForCap75_85 = Number(sel.value);
+
+            // 初回更新
+            const vals = calcCap75_85_SpValues();
+            updateNeedTable(vals.capSpVal, vals.sp75Val, vals.sp85Val);
+
+            // 変更時に即時反映
+            sel.onchange = function() {
+                baseSpMinForCap75_85 = Number(sel.value);
+                const vals2 = calcCap75_85_SpValues();
+                updateNeedTable(vals2.capSpVal, vals2.sp75Val, vals2.sp85Val);
+            };
+        }
+
+        // 4) SP表から蓋/75/85の「スピ値」を決める（SP表の speed == 取り得るスピ）
+        function calcCap75_85_SpValues() {
+            makeSPTable();
+
+            let capSpVal = null, sp75Val = null, sp85Val = null;
+
+            if (baseSpMinForCap75_85 !== null && spTableData.length > 0) {
+                let candidates = spTableData.filter(row => row.speed === baseSpMinForCap75_85);
+                if (candidates.length > 0) {
+                    candidates.sort((a, b) => a.speed - b.speed);
+                    let row = candidates[0];
+
+                    capSpVal = row.vcap;
+                    sp75Val = row.v75;
+                    sp85Val = row.v85;
+
+                    // 念のため上限200
+                    capSpVal = Math.min(capSpVal, 200);
+                    sp75Val = Math.min(sp75Val, 200);
+                    sp85Val = Math.min(sp85Val, 200);
+                }
+            }
+
+            document.getElementById('tbl_sp_cap').textContent = (capSpVal !== null ? capSpVal : "--");
+            document.getElementById('tbl_sp_75').textContent  = (sp75Val !== null ? sp75Val : "--");
+            document.getElementById('tbl_sp_85').textContent  = (sp85Val !== null ? sp85Val : "--");
+
+            return {capSpVal, sp75Val, sp85Val};
+        }
+
+        // 5) 4列表：必要本数（スピ値-入厩時最大）と（スピ値-測定中）を計算して表示
+        function updateNeedTable(capSpVal, sp75Val, sp85Val) {
+            function setNeed(rowKey, spValue) {
+                const nyu = nyukyuSpMax;
+                const cur = measuringSp;
+
+                const needNyuEl = document.getElementById('tbl_need_' + rowKey + '_nyukyu');
+                const needNowEl = document.getElementById('tbl_need_' + rowKey + '_now');
+
+                if(typeof spValue !== "number" || nyu === null) needNyuEl.textContent = "--";
+                else needNyuEl.textContent = (spValue - nyu);
+
+                if(typeof spValue !== "number" || cur === null) needNowEl.textContent = "--";
+                else needNowEl.textContent = (spValue - cur);
+            }
+
+            // cap/75/85（SP表から算出したスピ値）
+            setNeed('cap', capSpVal);
+            setNeed('75', sp75Val);
+            setNeed('85', sp85Val);
+
+            // 固定スピ値（120/150/A/B/C）
+            setNeed('120', 120);
+            setNeed('150', 150);
+            setNeed('A', 100);
+            setNeed('B', 85);
+            setNeed('C', 70);
+        }
+
+        // 測定中スピのボタンを（再）接続
+        function bindMeasureButtons() {
+            const decBtn = document.getElementById('measSp_dec');
+            const incBtn = document.getElementById('measSp_inc');
+
+            decBtn.onclick = function() {
+                if(measuringSp === null) return;
+                measuringSp = Math.max(0, measuringSp - 1);
+                document.getElementById('measuringSp_val').textContent = measuringSp;
+
+                const vals = calcCap75_85_SpValues();
+                updateNeedTable(vals.capSpVal, vals.sp75Val, vals.sp85Val);
+            };
+            incBtn.onclick = function() {
+                if(measuringSp === null) return;
+                measuringSp = Math.min(200, measuringSp + 1);
+                document.getElementById('measuringSp_val').textContent = measuringSp;
+
+                const vals = calcCap75_85_SpValues();
+                updateNeedTable(vals.capSpVal, vals.sp75Val, vals.sp85Val);
+            };
+        }
+
+        // 初期化（選択状態は毎回リセットする現行仕様を踏襲）
+        spSel.onchange = function() {
+            displayValues();
+            displayFixedInfo();
+            calcNyukyuAndMeasuring();
+            buildBaseSpSelect();
+            bindMeasureButtons();
+        };
+        stSel.onchange = function() {
+            displayValues();
+            displayFixedInfo();
+            calcNyukyuAndMeasuring();
+            buildBaseSpSelect();
+            bindMeasureButtons();
+        };
+
         spSel.selectedIndex = 0; stSel.selectedIndex = 0;
+
         displayValues();
-
-        // --- ここから 75%/85%計算修正 ---
-        let sp75 = "--", sp85 = "--";
-        let curSpMin = (currentRanges.length > 0) ? currentRanges[0].curSpeed[0] : undefined;
-        let curSpMax = (currentRanges.length > 0) ? currentRanges[0].curSpeed[1] : undefined;
-        let spTableMinVmax = (spTableData.length > 0) ? spTableData[0].vmax : undefined;
-
-        // baseSpMinとして大きい方を選択
-        let baseSpMin = (typeof curSpMin !== "undefined" && typeof spTableMinVmax !== "undefined")
-            ? Math.max(curSpMin, spTableMinVmax)
-            : undefined;
-
-        // 「現スピ」「最小スピ時の現スピ」表示
-        document.getElementById('curSpMin_val').textContent = (typeof curSpMin !== "undefined" ? curSpMin : "--");
-        document.getElementById('spTableMinVmax_val').textContent = (typeof spTableMinVmax !== "undefined" ? spTableMinVmax : "--");
-
-        // 75%, 85%の計算
-        if (typeof baseSpMin !== "undefined" && spTableData.length > 0) {
-            // baseSpMinと等しい vmax の行（speed小さい方優先）
-            let candidates = spTableData.filter(row => row.vmax === baseSpMin);
-            if (candidates.length > 0) {
-                candidates.sort((a, b) => a.speed - b.speed);
-                let row = candidates[0];
-                sp75 = row.v75 - baseSpMin;
-                sp85 = row.v85 - baseSpMin;
-            }
-        }
-
-        //蓋までの計算
-        let capVal = "--";
-        if (typeof baseSpMin !== "undefined" && spTableData.length > 0) {
-            // 「初期値max」列（vmax）が baseSpMin と一致する行を全て取得
-            let candidates = spTableData.filter(row => row.vmax === baseSpMin);
-            if (candidates.length > 0) {
-                // スピード値が小さい順にソートし、一番小さい行を採用
-                candidates.sort((a, b) => a.speed - b.speed);
-                let row = candidates[0];
-                capVal = row.vcap - baseSpMin;
-            }
-        }
-
-        document.getElementById('cap_val').textContent = capVal;
-        document.getElementById('sp75_val').textContent = sp75;
-        document.getElementById('sp85_val').textContent = sp85;
-        document.getElementById('sp120_val').textContent = (typeof curSpMax !== "undefined") ? (120 - curSpMax) : "--";
-        document.getElementById('sp150_val').textContent = (typeof curSpMax !== "undefined") ? (150 - curSpMax) : "--";
-        document.getElementById('spA_val').textContent = (typeof curSpMax !== "undefined") ? (100 - curSpMax) : "--";
-        document.getElementById('spB_val').textContent = (typeof curSpMax !== "undefined") ? (85 - curSpMax) : "--";
-        document.getElementById('spC_val').textContent = (typeof curSpMax !== "undefined") ? (70 - curSpMax) : "--";
+        displayFixedInfo();
+        calcNyukyuAndMeasuring();
+        buildBaseSpSelect();
+        bindMeasureButtons();
     }
-
-    // --- SP表データ作成
-    function makeSPTable() {
-    const memoryKey = document.getElementById('memory').value;
-    let spMin = allCommentsSp[0] || 0, spMax = allCommentsSp[1] || 0;
-    let cap = memoryCap[memoryKey] || 100;
-    let mem = memoryMap[memoryKey] || [75,79];
-    spTableData = [];
-    for (let s = spMin; s <= spMax; s++) {
-      let v85 = Math.ceil(s * 85 / 100),
-          v75 = Math.ceil(s * 75 / 100),
-          vmax = Math.floor(s * mem[1] / 100),
-          vmin = Math.floor(s * mem[0] / 100),
-          vcap = Math.round(s * cap / 100);
-      spTableData.push({speed: s, v85, v75, vmax, vmin, vcap});
-    }
-  }
-
-
 
     // ----- SP表 タブの内容 -----
     function updateTableTab() {
-    document.getElementById('table_sp').textContent = `推定スピ:${allCommentsSp[0]||"--"} ～ ${allCommentsSp[1]||"--"}`;
-    document.getElementById('table_st').textContent = `推定スタ:${allCommentsSt[0]||"--"} ～ ${allCommentsSt[1]||"--"}`;
-    makeSPTable(); // ←ここでspTableDataを生成
-    let th = `<tr><th>スピード</th><th>85%</th><th>75%</th><th>初期値max</th><th>初期値min</th><th>蓋</th></tr>`;
-    let rows = "";
-    spTableData.forEach(row => {
-        rows += `<tr><td>${row.speed}</td><td>${row.v85}</td><td>${row.v75}</td><td>${row.vmax}</td><td>${row.vmin}</td><td>${row.vcap}</td></tr>`;
-    });
-    document.getElementById('spTableContainer').innerHTML = `<table>${th}${rows}</table>`;
+      document.getElementById('table_sp').textContent = `推定スピ:${allCommentsSp[0]||"--"} ～ ${allCommentsSp[1]||"--"}`;
+      document.getElementById('table_st').textContent = `推定スタ:${allCommentsSt[0]||"--"} ～ ${allCommentsSt[1]||"--"}`;
+      makeSPTable(); // ←ここでspTableDataを生成
+      let th = `<tr><th>スピード</th><th>85%</th><th>75%</th><th>初期値max</th><th>初期値min</th><th>蓋</th></tr>`;
+      let rows = "";
+      spTableData.forEach(row => {
+          rows += `<tr><td>${row.speed}</td><td>${row.v85}</td><td>${row.v75}</td><td>${row.vmax}</td><td>${row.vmin}</td><td>${row.vcap}</td></tr>`;
+      });
+      document.getElementById('spTableContainer').innerHTML = `<table>${th}${rows}</table>`;
     }
 
     // ----- イベントリスナ -----
     ['commentA','commentB','commentMid','speedVal','staminaVal',
      'memory','category','speedInit','staminaInit'
     ].forEach(id => document.getElementById(id).addEventListener('change', function() {
-     updateOutput();
-     makeSPTable();
-     updateTableTab();
-     updateMeasureTab();
+      updateOutput();
+      makeSPTable();
+      updateTableTab();
+      updateMeasureTab();
     }));
   </script>
 </body>
