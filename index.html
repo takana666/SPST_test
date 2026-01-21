@@ -284,6 +284,11 @@
       .measuring-row { gap:4px; }
       .measuring-row select.meas-sp-select { min-width: 78px; }
     }
+
+/* tighten spacing inside result boxes (mobile/desktop) */
+.result .section-title, .result-abmid .section-title{ margin-top:6px; }
+.result .section-title:first-child, .result-abmid .section-title:first-child{ margin-top:0; }
+.result .range, .result-abmid .range{ margin-bottom:4px; }
 </style>
 </head>
 <body>
@@ -393,7 +398,7 @@
       <option>スピードでこの馬が</option>
       <option>既にG1で勝ち負け</option>
       <option>G1現実的</option>
-      <option>G1にも手が届く</option>
+      <option>G1にも手が届く(G1距離次第)</option>
       <option>G1相手次第</option>
       <option>距離次第</option>
       <option>スタミナいまひとつ</option>
@@ -580,14 +585,14 @@
         {speed:[70,119],stamina:[90,200]},
         {speed:[90,119],stamina:[70,89]}
       ],
-      "G1にも手が届く": [
+      "G1にも手が届く(G1距離次第)": [
         {speed:[0,69],stamina:[90,200]},
         {speed:[90,119],stamina:[0,69]}
       ],
 
       "G1相手次第": [
-        {speed:[70,79],stamina:[80,89]},
-        {speed:[80,89],stamina:[70,89]}
+        {speed:[70,89],stamina:[80,89]},
+        {speed:[80,89],stamina:[70,79]}
       ],
       "距離次第": [
         {speed:[80,89],stamina:[0,69]},
