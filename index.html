@@ -218,7 +218,27 @@
       width: 1%;
     }
 
-  </style>
+  
+/* --- Mobile table width tightening (override) --- */
+@media (max-width: 768px){
+  .need-table{ display: inline-table; width: max-content; table-layout: auto; }
+  .need-table th, .need-table td{ padding: 1px 3px !important; font-size: 11px !important; line-height: 1.15; }
+  .need-table th, .need-table td{ white-space: nowrap; }
+  .need-table th:nth-child(1), .need-table td:nth-child(1){ width: 1%; text-align: left !important; }
+  .need-table th:nth-child(2), .need-table td:nth-child(2){ width: 1%; text-align: right; }
+  .need-table th:nth-child(3), .need-table td:nth-child(3){ width: 1%; text-align: right; }
+  .need-table th:nth-child(4), .need-table td:nth-child(4){ width: 1%; text-align: right; }
+
+  .sp-table{ display: inline-table; width: max-content; table-layout: auto; }
+  .sp-table th, .sp-table td{ padding: 1px 3px !important; font-size: 11px !important; line-height: 1.15; white-space: nowrap; }
+  .sp-table th:nth-child(1), .sp-table td:nth-child(1){ width: 1%; text-align: left !important; }
+  .sp-table th:nth-child(2), .sp-table td:nth-child(2){ width: 1%; }
+  .sp-table th:nth-child(3), .sp-table td:nth-child(3){ width: 1%; }
+  .sp-table th:nth-child(4), .sp-table td:nth-child(4){ width: 1%; }
+  .sp-table th:nth-child(5), .sp-table td:nth-child(5){ width: 1%; }
+}
+
+</style>
 </head>
 <body>
   <h1>DBMS_Speed & Stamina checker（テスト中）</h1>
