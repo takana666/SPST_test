@@ -184,7 +184,41 @@
       .need-table th { line-height: 1.1; }
     }
 
-</style>
+
+    /* --- tighter column widths (shrink-to-content) --- */
+    .need-table{
+      width: auto !important;
+      max-width: none !important;
+      display: inline-table; /* shrink-wrap on iOS Safari */
+      table-layout: auto !important;
+    }
+    .need-table th, .need-table td{
+      white-space: nowrap;
+    }
+    /* make numeric columns as small as possible */
+    .need-table th:nth-child(n+2),
+    .need-table td:nth-child(n+2){
+      width: 1%;
+    }
+    .need-table th:nth-child(1),
+    .need-table td:nth-child(1){
+      width: 1%;
+    }
+
+    .sp-table{
+      width: auto !important;
+      max-width: none !important;
+      display: inline-table;
+      table-layout: auto !important;
+    }
+    .sp-table th, .sp-table td{
+      white-space: nowrap;
+    }
+    .sp-table th, .sp-table td{
+      width: 1%;
+    }
+
+  </style>
 </head>
 <body>
   <h1>DBMS_Speed & Stamina checker（テスト中）</h1>
