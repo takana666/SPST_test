@@ -149,12 +149,6 @@
         font-size: 11px;
       }
     }
-.need-table th:nth-child(1), .need-table td:nth-child(1){ width: 34%; }
-      .need-table th:nth-child(2), .need-table td:nth-child(2){ width: 22%; }
-      .need-table th:nth-child(3), .need-table td:nth-child(3){ width: 22%; }
-      .need-table th:nth-child(4), .need-table td:nth-child(4){ width: 22%; }
-    }
-
     /* --- tighter table handling on mobile --- */
     .need-table-wrap{
       width: 100%;
@@ -266,6 +260,15 @@
         table-layout: auto !important;
       }
     }
+/* === Mobile table width: match card/select width (100%) while keeping columns tight === */
+.need-table, .sp-table { width: 100% !important; max-width: 100% !important; table-layout: auto !important; }
+/* Remove any fixed/percent widths that may remain */
+.need-table th, .need-table td { width: auto !important; }
+/* Keep numeric columns compact */
+.need-table th:nth-child(n+2), .need-table td:nth-child(n+2),
+.sp-table th, .sp-table td { white-space: nowrap; }
+.need-table th:first-child, .need-table td:first-child { white-space: nowrap; }
+
 </style>
 </head>
 <body>
