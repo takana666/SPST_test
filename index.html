@@ -79,27 +79,74 @@
     }
 
     /* 各スピ条件テーブル（スマホ向けに横幅を詰める） */
-    .need-table{
+    .need-table-wrap{
       width: 100%;
-      table-layout: fixed;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* テーブルは“必要な分だけ”の横幅にして、枠内でスクロールさせる */
+    .need-table{
+      width: max-content;
+      max-width: 100%;
+      table-layout: auto;
       border-collapse: collapse;
       margin-top: 8px;
     }
     .need-table th, .need-table td{
-      padding: 6px 6px;
-      font-size: 14px;
+      padding: 4px 6px;
+      font-size: 13px;
+      line-height: 1.15;
+      vertical-align: middle;
     }
-    .need-table th:nth-child(1), .need-table td:nth-child(1){ width: 30%; }
-    .need-table th:nth-child(2), .need-table td:nth-child(2){ width: 23%; }
-    .need-table th:nth-child(3), .need-table td:nth-child(3){ width: 23%; }
-    .need-table th:nth-child(4), .need-table td:nth-child(4){ width: 24%; }
+    /* 数字列は折り返さない（列幅を詰める） */
+    .need-table th:nth-child(n+2),
+    .need-table td:nth-child(n+2){
+      white-space: nowrap;
+      text-align: right;
+    }
+    /* 項目列は必要なら折り返し */
+    .need-table th:nth-child(1),
+    .need-table td:nth-child(1){
+      white-space: nowrap;
+    }
 
     @media (max-width: 600px){
       .need-table th, .need-table td{
-        padding: 4px 4px;
-        font-size: 12px;
+        padding: 2px 4px;
+        font-size: 11px;
       }
-      .need-table th:nth-child(1), .need-table td:nth-child(1){ width: 34%; }
+    }
+
+    /* SP表（スマホで枠からはみ出さないように） */
+    .sp-table-scroll{
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .sp-table{
+      width: max-content;
+      max-width: 100%;
+      table-layout: auto;
+      border-collapse: collapse;
+    }
+    .sp-table th, .sp-table td{
+      padding: 4px 6px;
+      font-size: 13px;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+    .sp-table th, .sp-table td{ text-align: right; }
+    .sp-table th:first-child, .sp-table td:first-child{ text-align: left; }
+
+    @media (max-width: 600px){
+      .sp-table th, .sp-table td{
+        padding: 2px 4px;
+        font-size: 11px;
+      }
+    }
+.need-table th:nth-child(1), .need-table td:nth-child(1){ width: 34%; }
       .need-table th:nth-child(2), .need-table td:nth-child(2){ width: 22%; }
       .need-table th:nth-child(3), .need-table td:nth-child(3){ width: 22%; }
       .need-table th:nth-child(4), .need-table td:nth-child(4){ width: 22%; }
