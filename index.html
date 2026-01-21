@@ -52,6 +52,9 @@
     }
     .sp-table-scroll { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { border-collapse: collapse; min-width: 540px; }
+    /* Override global table min-width for these tables (mobile-friendly) */
+    .need-table, .sp-table { min-width: 0 !important; }
+
     th, td { border: 1px solid #aaa; padding: 5px 8px; text-align: right; font-size: 14px; }
     th { background: #f4f4f4; }
 
@@ -267,7 +270,7 @@
 </head>
 <body>
   <h1>DBMS_Speed & Stamina checker（テスト中）</h1>
-  <h5>リリース日：2026/01/21<br>
+  <h5>リリース日：2025/05/12<br>
     計算の都合上、一部の値の上限を200or199に制限しています<br>
     バグ確認中のため、不具合見つけたら連絡ください
   </h5>
@@ -1199,4 +1202,3 @@ let spList = Array.from(spSet).sort((a, b) => a - b);
   </script>
 </body>
 </html>
-
