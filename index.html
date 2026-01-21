@@ -238,6 +238,31 @@
   .sp-table th:nth-child(5), .sp-table td:nth-child(5){ width: 1%; }
 }
 
+
+    /* --- Mobile table width squeeze override (Safari friendly) --- */
+    @media (max-width: 600px){
+      /* Cancel any percentage column widths so columns can shrink to content */
+      .need-table th:nth-child(1), .need-table td:nth-child(1),
+      .need-table th:nth-child(2), .need-table td:nth-child(2),
+      .need-table th:nth-child(3), .need-table td:nth-child(3),
+      .need-table th:nth-child(4), .need-table td:nth-child(4){
+        width: auto !important;
+      }
+      .need-table{
+        display: inline-table !important;
+        width: max-content !important;
+        table-layout: auto !important;
+      }
+
+      .sp-table th, .sp-table td{
+        width: auto !important;
+      }
+      .sp-table{
+        display: inline-table !important;
+        width: max-content !important;
+        table-layout: auto !important;
+      }
+    }
 </style>
 </head>
 <body>
