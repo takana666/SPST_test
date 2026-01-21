@@ -50,7 +50,7 @@
         box-shadow: 0 2px 8px #8882;
         max-width: 600px;
     }
-    .sp-table-scroll { max-width: 610px; overflow-x: auto; }
+    .sp-table-scroll { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { border-collapse: collapse; min-width: 540px; }
     th, td { border: 1px solid #aaa; padding: 5px 8px; text-align: right; font-size: 14px; }
     th { background: #f4f4f4; }
@@ -126,6 +126,15 @@
         padding: 3px 3px !important;
         font-size: 11px !important;
       }
+    }
+
+
+    /* SP表（スマホ向けに横幅を詰める） */
+    .sp-table { width: max-content; border-collapse: collapse; }
+    .sp-table th, .sp-table td { padding: 6px 6px; font-size: 14px; white-space: nowrap; }
+    @media (max-width: 600px){
+      .sp-table th, .sp-table td { padding: 3px 3px; font-size: 11px; }
+      .need-table th { line-height: 1.1; }
     }
 
 </style>
@@ -309,8 +318,8 @@
             <tr>
                 <th style="text-align:left;">項目</th>
                 <th>スピ値(A)</th>
-                <th>最低必要本数</th>
-                <th>測定値からの本数</th>
+                <th>最低<br>必要本数</th>
+                <th>測定値からの<br>本数</th>
             </tr>
             <tr>
                 <td style="text-align:left;">蓋まで</td>
@@ -1040,7 +1049,7 @@ let spList = Array.from(spSet).sort((a, b) => a - b);
       spTableData.forEach(row => {
           rows += `<tr><td>${row.speed}</td><td>${row.v85}</td><td>${row.v75}</td><td>${row.vmax}</td><td>${row.vmin}</td><td>${row.vcap}</td></tr>`;
       });
-      document.getElementById('spTableContainer').innerHTML = `<table>${th}${rows}</table>`;
+      document.getElementById('spTableContainer').innerHTML = `<table class="sp-table">${th}${rows}</table>`;
     }
 
     ['commentA','commentB','commentMid','speedVal','staminaVal',
