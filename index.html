@@ -104,6 +104,30 @@
       .need-table th:nth-child(3), .need-table td:nth-child(3){ width: 22%; }
       .need-table th:nth-child(4), .need-table td:nth-child(4){ width: 22%; }
     }
+
+    /* --- tighter table handling on mobile --- */
+    .need-table-wrap{
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Prevent the table from forcing the page wider than the card */
+    .need-table{
+      max-width: 100%;
+    }
+    /* If contents are still too wide, allow breaking inside numeric ranges */
+    .need-table td span{
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    @media (max-width: 600px){
+      .need-table th, .need-table td{
+        padding: 3px 3px !important;
+        font-size: 11px !important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -280,6 +304,7 @@
 
         <br>
 
+        <div class="need-table-wrap">
         <table class="need-table">
             <tr>
                 <th style="text-align:left;">項目</th>
@@ -342,6 +367,7 @@
                 <td><span id="tbl_need_D_now">--</span></td>
             </tr>
         </table>
+        </div>
 
         <h5 style="margin-top:12px;">75%、85%までの最小本数は計算基準値からズレる場合があるため<br>
             -1~-2を見込んで使ってください<br>
